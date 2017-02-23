@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="item1">
+        <item>table</item>
+        <item>rc4</item>
+        <item>rc4-md5</item>
+        <item>rc4-md5-6</item>
+        <item>aes-128-cfb</item>
+        <item>aes-192-cfb</item>
+        <item>aes-256-cfb</item>
+        <item>bf-cfb</item>
+        <item>camellia-128-cfb</item>
+        <item>camellia-192-cfb</item>
+        <item>camellia-256-cfb</item>
+        <item>salsa20</item>
+        <item>chacha20</item>
+        <item>chacha20-ietf</item>
+    </string-array>
+    <string-array name="item2">
+        <item>origin</item>
+        <item>verify_simple</item>
+        <item>verify_sha1</item>
+        <item>auth_simple</item>
+        <item>auth_sha1</item>
+        <item>auth_sha1_v2</item>
+        <item>auth_sha1_v4</item>
+    </string-array>
+    <string-array name="item3">
+        <item>plain</item>
+        <item>http_simple</item>
+        <item>tls_simple</item>
+        <item>random_head</item>
+        <item>tls1.2_ticket_auth</item>
+    </string-array>
+</resources>
