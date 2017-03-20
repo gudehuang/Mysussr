@@ -19,8 +19,6 @@ import android.view.View;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-import java.io.File;
-
 
 
 /**
@@ -114,13 +112,7 @@ public class StartAct extends AppCompatActivity {
             {
               finish();
             }
-            else {
-                File file=new File(sussrPath+"/datalist");
-                if (file.exists())
-                {
-                    file.delete();
-                }
-            }
+
         }
     }
 

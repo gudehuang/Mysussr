@@ -1,6 +1,5 @@
 package com.example.hzg.mysussr;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,7 +20,7 @@ public class BootBroadcastReceiver extends BroadcastReceiver{
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    ShellTool.execShell(new String[]{MainActivity.StartSussrShell},true,false);
+                    ShellTool.execShell(new String[]{ConfigTool.StartSussrShell},true,false);
                 }
             }).start();
         }

@@ -1,10 +1,14 @@
 package com.example.hzg.mysussr;
 
+import android.Manifest;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +17,8 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutCompat;
@@ -33,17 +39,14 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -51,16 +54,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     RecyclerView applistview;
     Button btnstart, btnstop, btncheck;
     FloatingActionButton btnIp;
-    public static final String SUSSR_DIR = "/data/sussr/";
-    public static String StartSussrShell= SUSSR_DIR + "start.sh";
-    public static String StopSussrShell = SUSSR_DIR + "stop.sh";
-    public static String CheckSussrShell = SUSSR_DIR + "check.sh";
     private String dataPath = StartAct.sussrPath+"/datalist";
-    public String[] Inatall_SUSSR = new String[]{"mkdir " + SUSSR_DIR, "unzip -o " + StartAct.sussrInstallPath + " -d " + SUSSR_DIR,
-            "chmod -R 777 " + SUSSR_DIR};
-    String[] StopSussr = new String[]{StopSussrShell};
-    String[] CheckSussr = new String[]{CheckSussrShell};
-    private String[] Remove_SUSSR = new String[]{"busybox rm -R " + SUSSR_DIR};
     private  ProgressDialog dialog;
     private Handler handler=new Handler()
     {
@@ -93,6 +87,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private  int position;
     //记录是否开机启动脚本的变量
     private  boolean isbootstart=false;
+    private  ConfigTool mConfigTool;
+    private  DownloadBroadcastReceiver downloadBroadcastReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,48 +106,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //
         initParams();
         applistview.setLayoutManager(new LinearLayoutManager(this));
-        if (position>=datalist.size())position=0;
+        if (datalist==null||position>=datalist.size())position=0;
         adapter=new MyAdapter(datalist,position);
         applistview.setAdapter(adapter);
+        downloadBroadcastReceiver=new DownloadBroadcastReceiver();
+        registerReceiver(downloadBroadcastReceiver,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        UpdateTool.setmAct(this);
     }
 
     private void initParams() {
         SharedPreferences preferences=getSharedPreferences("sussr",MODE_PRIVATE);
         position=preferences.getInt("position",0);
         isbootstart=preferences.getBoolean("boot",false);
-        //从文件中获取容器
-        readDataList();
-    }
-
-    private void readDataList() {
-        File file=new File(dataPath);
-        if (file.exists()) {
-            try {
-                ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(file));
-                datalist = (ArrayList<String[]>) objectInputStream.readObject();
-            } catch (IOException e) {
-                e.printStackTrace();
-
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-
-            }
+        if (Build.VERSION.SDK_INT>21&& ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            //申请WRITE_EXTERNAL_STORAGE权限
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                    1);
         }
-        else {
-            initDataList();}
+        mConfigTool=new ConfigTool(dataPath,position);
+        datalist=mConfigTool.getDatalist();
     }
 
-    private void initDataList() {
-        datalist = new ArrayList<>();
-        String[] defaultSetting = getDefaultItem("default");
-        datalist.add(defaultSetting);
-    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode==1)
+        {
+            if (grantResults[0]==PackageManager.PERMISSION_DENIED)
+            {
+                finish();
+            }
 
-    @NonNull
-    private String[] getDefaultItem(String itemname) {
-        return new String[]{itemname," ","80"," ","supppig",
-                    "chacha20","auth_sha1","http_simple","114.255.201.163","114.114.114.114",
-                    "1","1","1","0","0"};
+        }
     }
 
     @Override
@@ -163,12 +150,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onPause() {
         super.onPause();
-        try {
-            ObjectOutputStream objectOutputStream=new ObjectOutputStream(new FileOutputStream(dataPath));
-            objectOutputStream.writeObject(datalist);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mConfigTool.saveConfig(dataPath);
         SharedPreferences preferences=getSharedPreferences("sussr",MODE_PRIVATE);
         SharedPreferences.Editor editor=preferences.edit();
         editor.putInt("position",position);
@@ -180,18 +162,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
+        unregisterReceiver(downloadBroadcastReceiver);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0,100,0,"安装sussr.zip");
-        menu.add(0,200,0,"安装busybox");
-        menu.add(0,300,0,"卸载sussr.zip");
-        menu.add(0,400,0,"重置应用");
-        menu.add(0,500,0,"选择配置").setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add(0,600,0,"新增配置").setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add(0,700,0,"修改文件").setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        getMenuInflater().inflate(R.menu.menu,menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -199,23 +175,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId())
         {
-            case  100:
+            case  R.id.menu_install_sussr:
                 dialog=ProgressDialog.show(this,"脚本执行","脚本执行中，请稍等........",true,false);
-                ShellTool.execShellWithHandler(Inatall_SUSSR,true,true,handler);
+                ShellTool.execShellWithHandler(mConfigTool.getInstallShell(),true,true,handler);
                 break;
-            case  200:
-                Intent intent=new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(Uri.parse("file://"+StartAct.BusyboxInstallPath),"application/vnd.android.package-archive");
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
+            case  R.id.menu_install_busybox:
+               Utils.installApk(this,StartAct.BusyboxInstallPath,"com.example.hzg.mysussr.provider");
                 break;
-            case  300:
+            case  R.id.menu_uninstall_sussr:
                 dialog=ProgressDialog.show(this,"脚本执行","脚本执行中，请稍等........",true,false);
-                ShellTool.execShellWithHandler(Remove_SUSSR,true,true,handler);
+                ShellTool.execShellWithHandler(mConfigTool.getRemoveShell(),true,true,handler);
 
 
                 break;
-            case  400:
+            case  R.id.menu_reset:
                 SharedPreferences.Editor editor=getSharedPreferences("sussr",MODE_PRIVATE).edit();
                 editor.putBoolean("isaccept",false);
                 editor.commit();
@@ -223,56 +196,186 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent1);
                 finish();
                 break;
-            case  500:
-                AlertDialog.Builder builder= new AlertDialog.Builder(this);
-                builder.setTitle("选择配置");
-                String[] items=new String[datalist.size()];
-                for (int i=0;i<items.length;i++)
-                {
-                    items[i]=datalist.get(i)[0];
+            case  R.id.menu_select_list:
+                selectConfigList();
+                break;
+            case R.id.menu_edit_setting:
+                if (Build.VERSION.SDK_INT>19) {
+                    ShellTool.editTextFileWithShellandStream(this,StartAct.sussrPath+"/temp" ,"/data/sussr/setting.ini");
                 }
-                final int[] select = {position};
-                builder.setSingleChoiceItems(items, position, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        select[0] =which;
-                    }
-                });
-                builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (position!=select[0])position=select[0];
+                else  FileTool.editTextFileWithStream(this,"/data/sussr/setting.ini");
+
+                break;
+            case  R.id.menu_help:
+                if (Build.VERSION.SDK_INT>19) {
+                    ShellTool.editTextFileWithShellandStream(this,StartAct.sussrPath+"/temp" ,"/data/sussr/说明.txt");
+                }
+                else  FileTool.editTextFileWithStream(this,"/data/sussr/说明.txt");
+                break;
+            case  R.id.menu_update:
+                 UpdateTool.checkUpdate(new UpdateTool.CheckCallBack() {
+                     @Override
+                     public void onSuccess(final UpdateAppInfo updateAppInfo) {
+                         AlertDialog.Builder updateBuilder = new AlertDialog.Builder(MainActivity.this);
+                         updateBuilder.setTitle("当前版本"+UpdateTool.getAppVersionName(getApplicationContext()));
+                         if (updateAppInfo.data.apkVersionCode>UpdateTool.getAppVersionCode(getApplicationContext())) {
+
+                             updateBuilder.setMessage("有新版本可以更新!\n"+updateAppInfo.data.toString());
+                             final String apkFileName=updateAppInfo.data.apkName+updateAppInfo.data.apkVersion+".apk";
+                             updateBuilder.setPositiveButton("立即更新", new DialogInterface.OnClickListener() {
+                                 @Override
+                                 public void onClick(DialogInterface dialog, int which) {
+                                     //检查目录中有没有更新文件，有就直接安装，没有就使用DownloadManger下载
+                                     File apkFile=new File(getExternalFilesDir("apk")+"/"+apkFileName);
+                                     if (apkFile.exists())
+                                     {
+                                         Utils.installApk(MainActivity.this,apkFile.getPath(),"com.example.hzg.mysussr.provider");
+                                     }
+                                     else {
+                                         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(updateAppInfo.data.apkUrl));
+                                         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+                                         request.setTitle(updateAppInfo.data.apkName + updateAppInfo.data.apkVersion);
+                                         request.setDescription("MySussr更新中");
+                                         request.setMimeType("application/vnd.android.package-archive");
+                                         request.setDestinationInExternalFilesDir(MainActivity.this, "apk", apkFileName);
+                                         //DownloadManger 下载的文件重名不会覆写，只会在文件名后加一些标识符
+                                         // 如 update-1.apk ，-2
+                                         //需要清理重复的文件
+                                         File apkdir = getExternalFilesDir("apk");
+                                         if (apkdir.exists()) {
+                                             File[] files = apkdir.listFiles();
+                                             for (File file : files) {
+                                                 file.delete();
+                                             }
+                                         }
+                                         DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                                         long id = downloadManager.enqueue(request);
+                                         downloadBroadcastReceiver.setmDownloadId(id);
+                                     }
+                                 }
+                             });
+                          updateBuilder.setNeutralButton("暂不更新",null);
+                         }
+                         else
+                         {
+                             updateBuilder.setMessage("当前版本已经是最新的了，无需更新");
+
+                         }
+
+                         updateBuilder.create().show();
+                     }
+
+                     @Override
+                     public void onError() {
+
+                         Toast.makeText(MainActivity.this,"访问失败",Toast.LENGTH_LONG).show();
+
+                     }
+
+
+                 });
+                break;
+            case R.id.menu_uid:
+                showUidDialog();
+                break;
+
+        }
+        return true;
+    }
+
+    public void showUidDialog() {
+        final ArrayList<Utils.AppUidMessage> uidData= (ArrayList<Utils.AppUidMessage>) Utils.getUidList(this);
+        final AlertDialog.Builder uidBuilder=new AlertDialog.Builder(this);
+        uidBuilder.setTitle("查看uid");
+        RecyclerView recyclerView=new RecyclerView(this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(new RecyclerView.Adapter() {
+            @Override
+            public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                 View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.uid,parent,false);
+
+                return new UidHolder(view);
+            }
+
+            @Override
+            public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+                          UidHolder uidHolder= (UidHolder) holder;
+                uidHolder.uid.setText(uidData.get(position).getUid());
+                uidHolder.label.setText(uidData.get(position).getAppName());
+                uidHolder.icon.setImageDrawable(uidData.get(position).getAppIcon());
+            }
+
+            @Override
+            public int getItemCount() {
+                return uidData.size();
+            }
+            class  UidHolder extends  RecyclerView.ViewHolder{
+                private TextView label;
+                private  TextView uid;
+                private ImageView icon;
+                public UidHolder(View itemView) {
+                    super(itemView);
+                    label= (TextView) itemView.findViewById(R.id.uid_label);
+                    uid= (TextView) itemView.findViewById(R.id.uid_uid);
+                    icon= (ImageView) itemView.findViewById(R.id.uid_icon);
+                }
+            }
+        });
+        uidBuilder.setView(recyclerView);
+        uidBuilder.setPositiveButton("关闭",null);
+        uidBuilder.create().show();
+    }
+
+    public void selectConfigList() {
+        AlertDialog.Builder builder= new AlertDialog.Builder(this);
+        builder.setTitle("选择配置");
+        String[] items=new String[datalist.size()];
+        for (int i=0;i<items.length;i++)
+        {
+            items[i]=datalist.get(i)[0];
+        }
+        final int[] select = {position};
+        builder.setSingleChoiceItems(items, position, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                select[0] =which;
+            }
+        });
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (position!=select[0])position=select[0];
+                adapter.setDatePosition(position);
+                adapter.notifyDataSetChanged();
+            }
+        });
+        builder.setNeutralButton("删除", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (datalist.size()>1)
+                {datalist.remove(select[0]);
+                    if (position==select[0]) {
+                        position=0;
                         adapter.setDatePosition(position);
                         adapter.notifyDataSetChanged();
                     }
-                });
-                builder.setNegativeButton("删除", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (datalist.size()>1)
-                        {datalist.remove(select[0]);
-                            if (position==select[0]) {
-                                position=0;
-                                adapter.setDatePosition(position);
-                                adapter.notifyDataSetChanged();
-                            }
-                            else  if (position>select[0]) {
-                                position--;
-                            }
-                        }
+                    else  if (position>select[0]) {
+                        position--;
                     }
-                });
-                builder.show();
-                break;
-            case 600:
-                AlertDialog.Builder builder1=new AlertDialog.Builder(this);
+                }
+            }
+        });
+        builder.setNegativeButton("新建", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                AlertDialog.Builder builder1=new AlertDialog.Builder(MainActivity.this);
                 builder1.setTitle("配置名称");
-                final EditText inputText = new EditText(this);
+                final EditText inputText = new EditText(MainActivity.this);
                 inputText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 builder1.setPositiveButton("新建", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String[] defaultSetting=getDefaultItem(inputText.getText().toString());
+                        String[] defaultSetting=mConfigTool.getDefaultConfigItem(inputText.getText().toString());
                         datalist.add(defaultSetting);
                         position=datalist.size()-1;
                         adapter.setDatePosition(position);
@@ -293,34 +396,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         inputManager.showSoftInput(inputText, 0);
                     }
                 }, 200);
-                break;
-            case 700:
-                if (Build.VERSION.SDK_INT>19) {
-                    ShellTool.editTextFileWithShellandStream(this,StartAct.sussrPath+"/temp" ,"/data/sussr/setting.ini");
-                }
-                else  FileTool.editTextFileWithStream(this,"/data/sussr/setting.ini");
-
-                break;
-        }
-        return true;
+            }
+        });
+        builder.show();
     }
+
+
     @Override
     public void onClick(View v) {
         switch (v.getId())
         {
             case R.id.check_btn:
                 dialog=ProgressDialog.show(this,"脚本执行","脚本执行中，请稍等........",true,false);
-                        ShellTool.execShellWithHandler(CheckSussr,true,true,handler);
+                        ShellTool.execShellWithHandler(mConfigTool.getCheckShell(),true,true,handler);
                 break;
             case  R.id.start_btn:
                 dialog=ProgressDialog.show(this,"脚本执行","脚本执行中，请稍等........",true,true);
-                String str = getParamString();
-                ShellTool.execShellWithHandler(new String[]{"sed -i '2,15d' /data/sussr/setting.ini",
-                                "sed -i '1a "+str  + "' /data/sussr/setting.ini",StartSussrShell},true,true,handler);
+                ShellTool.execShellWithHandler(mConfigTool.getStartShell(position),true,false,handler);
                 break;
             case  R.id.stop_btn:
                 dialog=ProgressDialog.show(this,"脚本执行","脚本执行中，请稍等........",true,false);
-                ShellTool.execShellWithHandler(StopSussr,true,true,handler);
+                ShellTool.execShellWithHandler(mConfigTool.getStopShell(),true,true,handler);
                 break;
             case  R.id.checkip_btn:
                 final WebView webview=new WebView(this);
@@ -339,18 +435,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     }
-
-    public String getParamString() {
-        String[] data=datalist.get(position);
-        String s="IP=%s\\\nPORT=%s\\\nPASSWORD=\"%s\"\\\nGOSTPWD=\"%s\"\\\nMETHOD=%s\\\nPROTOCOL=%s\\\nOBFS=%s"+
-                "\\\nHOST=\"%s\"\\\nDNS=%s\\\nDLUDP=%s\\\nBJUDP=%s\\\nGXUDP=%s\\\nQJDL=%s\\\nPBQ=%s";
-        System.out.println(s);
-        return String.format(s,
-                data[1],data[2],data[3],data[4],data[5]
-                ,data[6],data[7],data[8],data[9],data[10]
-                ,data[11],data[12],data[13],data[14]);
-    }
-
     class MyViewHolder extends RecyclerView.ViewHolder {
         TextView headerText;
         EditText contentText;
@@ -373,18 +457,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         /*3 edittext(无文字)     开关按钮              无弹出窗口
         /*4 edittext(有文字)     开关按钮              弹出窗口为编辑框
         * */
-        private  int[] type={
-                0,0,0,1,1,
-                2,2,2,0,0,
-                4,3,3,3,3,
-                3
-        };
-        private String[] header =
-                {"配置名称", "服务器", "端口", "密码","gost密码（udp转发为2时有效）",
-                "加密方法", "协议", "混淆方式", "混淆参数", "DNS地址",
-                "UDP转发(0直连/1服务器转发UDP/2TCP转发)","本机UDP放行（禁网/放行）","热点UDP放行（禁网/放行）","连接WIFI时强制使用ssr代理","破视频版权",
-                "开机自启脚本"
-        };
+        private  int[] type=mConfigTool.getType();
+        private String[] header=mConfigTool.getHeader();
 
         public MyAdapter(ArrayList<String[]> datalist,int position) {
             this.datalist = datalist;
@@ -550,7 +624,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                            @Override
                            public void onClick(DialogInterface dialog, int which) {
-                               if (type==2)
+                               if (type!=2)
                                data[position] = ((EditText) finalRoot).getText().toString().trim();
 
                                holder.contentText.setText(data[position]);
@@ -585,15 +659,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         public void setDatePosition(int position) {
             data=datalist.get(position);
-            if (data.length<header.length-1)
-            {
-                ArrayList<String> temp=new ArrayList<>(Arrays.asList(data));
-                while (temp.size()<header.length-1)
-                {
-                    temp.add("0");
-                }
-                data= (String[]) temp.toArray();
-            }
+
         }
     }
 
