@@ -14,9 +14,11 @@
 Sussr则是由supppig基于ShadowsocksR开发的android脚本启动版
 
 Sussr的目录结构：
+
 ![根目录](http://i4.buimg.com/567571/8d0d4449508f990f.png)
 
 tools目录：
+
 ![toolsmul](http://i1.piimg.com/567571/b877e9f31be9d1eb.png)
 
 使用Sussr需要root和安装busybox，把文件解压到/data/sussr下，配置权限777。      
@@ -32,6 +34,7 @@ check.sh   |  查询脚本
 而setting.ini文件的内容很多，修改十分不方便
 
 ![setting1](http://i4.buimg.com/567571/9692f1200d355330.png)
+
 ![settting2](http://i1.piimg.com/567571/2fc83f1113fab288.png)
 
 所以就有了MySussr这个辅助使用Sussr脚本的软件。
@@ -58,3 +61,12 @@ check.sh   |  查询脚本
 
 直接编辑：
 ![直接编辑](http://i2.muimg.com/567571/c2091b0e1f906029.png)
+
+***
+### 更新历史
+
+  #### MySussr2.1 （2017/3/27）  
+ [下载地址](http://pan.plyz.net/s/?u=2251461691&p=MySussr2.1.apk)
+1. sussr文件更新到5.3
+2. 新增ssr链接导入
+  ![ssr链接导入](http://i4.buimg.com/567571/c1fead272d8acd2e.png)
