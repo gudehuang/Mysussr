@@ -47,3 +47,14 @@ check.sh   |  查询脚本
 -  命令封装，按下对应按钮即可执行相应操作
 -  自助更新
 
+主界面：
+![主界面](http://i1.piimg.com/567571/49d4a0c0661f35e3.png)
+
+菜单选项：
+![菜单选项](http://i4.buimg.com/567571/16e050ad7726accb.png)
+
+配置选择：
+![配置选择](http://i1.piimg.com/567571/0b7b73b28c204f8d.png)
+
+直接编辑：
+![直接编辑](http://i2.muimg.com/567571/c2091b0e1f906029.png)
