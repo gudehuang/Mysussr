@@ -1,5 +1,7 @@
 package com.example.hzg.mysussr;
 
+import android.util.Base64;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -33,6 +35,7 @@ public class ConfigTool {
 
         File file=new File(dataPath);
         if (file.exists()) {
+            boolean isreadSuccess=false;
             try {
                 ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(file));
                 datalist = (ArrayList<String[]>) objectInputStream.readObject();
@@ -55,27 +58,35 @@ public class ConfigTool {
 
                     }
                 }
+                isreadSuccess=true;
             } catch (IOException e) {
                 e.printStackTrace();
 
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
-                datalist = new ArrayList<>();
-                String[] defaultSetting = getDefaultConfigItem("default");
-                datalist.add(defaultSetting);
+
+            }finally {
+                if (!isreadSuccess)
+                {
+                    initDataList();
+                }
             }
         }
         else {
-            datalist = new ArrayList<>();
-            String[] defaultSetting = getDefaultConfigItem("default");
-            datalist.add(defaultSetting);}
+            initDataList();}
         this.position = position;
+    }
+
+    public void initDataList() {
+        datalist = new ArrayList<>();
+        String[] defaultSetting = getDefaultConfigItem("default");
+        datalist.add(defaultSetting);
     }
 
     public String[] getDefaultConfigItem(String itemname) {
         return new String[]{itemname," ","80"," ","supppig",
                 "chacha20","auth_sha1","http_simple","114.255.201.163","114.114.114.114",
-                "1","1","1","0","0","0","0","0"};
+                "1","1","1","0","0","0","0","0","1"};
     }
     private  String separator="\\\n";
     public String getParamString(int position) {
@@ -98,14 +109,15 @@ public class ConfigTool {
                 "PBQ=%s" +separator+
                 "DATAADB=%s" +separator+
 
-                "HTTPSGL=%s" +separator+
-                "HOTADB=%s";
+                "HOTADB=%s" +separator+
+                "WIFIADB=%s" +separator+
+                "AUTOUPDATE=%s";
         System.out.println(s);
         return String.format(s,
                 data[1],data[2],data[3],data[4],data[5]
                 ,data[6],data[7],data[8],data[9],data[10]
                 ,data[11],data[12],data[13],data[14],data[15]
-                ,data[16],data[17]);
+                ,data[16],data[17],data[18]);
     }
 
     /*0 edittext             隐藏开关按钮          弹出窗口为编辑框
@@ -118,13 +130,13 @@ public class ConfigTool {
             0,0,0,1,1,
             2,2,2,0,0,
             4,3,3,3,3,
-            3,3,3,3
+            3,3,3,3,3
     };
     private String[] header =
             {"配置名称", "服务器", "端口", "密码","gost密码（udp转发为2时有效）",
                     "加密方法", "协议", "混淆方式", "混淆参数", "DNS地址",
                     "UDP转发(0直连/1服务器转发UDP/2TCP转发)","本机UDP放行（禁网/放行）","热点UDP放行（禁网/放行）","连接WIFI时强制使用ssr代理","破视频版权",
-                    "广告过滤","HTTPS过滤","热点过滤",
+                    "4G广告过滤","热点广告过滤","WIFI广告过滤","广告规则自动更新",
                     "开机自启脚本"
             };
 
@@ -169,6 +181,84 @@ public class ConfigTool {
     }
 
     public ArrayList<String[]> getDatalist() {
+        if (datalist==null)
+        {
+            initDataList();
+        }
         return datalist;
+    }
+    public String share(String[] config)
+    {
+        StringBuilder builder=new StringBuilder();
+        builder.append("sussr://");
+        int i=0;
+        for (String s:config)
+        {
+            i++;
+            builder.append(s);
+            if (i<config.length)
+            {
+                builder.append(":");
+            }
+
+        }
+        builder.append("/");
+        System.out.println(builder.toString());
+        return  new String(Base64.encode(builder.toString().getBytes(),Base64.DEFAULT));
+    }
+
+    /***
+     * 解析ssr链接
+     * @param ssr
+     * @return
+     */
+    public String[] getConfigItemFromSSR(String ssr)
+    {
+        System.out.println(ssr);
+        String[] result=ssr.split("/");
+        String string=result[2];
+        System.out.println(string);
+        String s=string.replace('_','/');
+        System.out.println(s);
+        String[] item=null;
+       try {
+           byte[] bytes = Base64.decode(s, Base64.DEFAULT);
+
+           String decodeString = new String(bytes);
+           String[] parms = decodeString.split("/")[0].split(":");
+           parms[5] = new String(Base64.decode(parms[5], Base64.DEFAULT));
+           System.out.println(decodeString);
+           item=new String[]{parms[0],parms[0],parms[1],parms[5],"supppig",
+                   parms[2],parms[3],parms[4],"114.255.201.163","114.114.114.114",
+                   "1","1","1","0","0","0","0","0","1"};
+       }catch (Exception e)
+       {
+
+       }
+        return  item;
+    }
+    public String[] getConfigItemFromSUSSR(String sussr)
+    {
+        System.out.println(sussr);
+        String[] result=sussr.split("/");
+        String string=result[2];
+        String[] item=null;
+       try {
+           byte[] bytes = Base64.decode(string, Base64.DEFAULT);
+
+           String decodeString = new String(bytes);
+           String[] parms = decodeString.split("/")[0].split(":");
+
+           System.out.println(decodeString);
+           item=parms;
+           for (String i:parms)
+           {
+               System.out.println(i);
+           }
+       }catch (Exception e)
+       {
+
+       }
+        return  item;
     }
 }

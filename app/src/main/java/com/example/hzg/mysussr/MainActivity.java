@@ -1,6 +1,7 @@
 package com.example.hzg.mysussr;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -106,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //
         initParams();
         applistview.setLayoutManager(new LinearLayoutManager(this));
-        if (datalist==null||position>=datalist.size())position=0;
+        if (position>=datalist.size())position=0;
         adapter=new MyAdapter(datalist,position);
         applistview.setAdapter(adapter);
         downloadBroadcastReceiver=new DownloadBroadcastReceiver();
@@ -363,6 +364,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         position--;
                     }
                 }
+                selectConfigList();
             }
         });
         builder.setNegativeButton("新建", new DialogInterface.OnClickListener() {
@@ -382,9 +384,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         adapter.notifyDataSetChanged();
                     }
                 });
+                builder1.setNeutralButton("导入",null);
                 builder1.setNegativeButton("取消",null);
                 builder1.setView(inputText);
-                builder1.show();
+                final AlertDialog dialogCreate=builder1.show();
+                //点击按钮，错误窗口不消失
+                dialogCreate.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String ssr=inputText.getText().toString();
+                        if (ssr.indexOf("ssr://")==0) {
+                            String[] defaultSetting = mConfigTool.getConfigItemFromSSR(ssr);
+                            if (defaultSetting == null) {
+                                Toast.makeText(MainActivity.this, "导入失败,请输入正确的ssr链接", Toast.LENGTH_LONG).show();
+                            } else {
+                                datalist.add(defaultSetting);
+                                position = datalist.size() - 1;
+                                adapter.setDatePosition(position);
+                                adapter.notifyDataSetChanged();
+                                Toast.makeText(MainActivity.this, "导入成功", Toast.LENGTH_LONG).show();
+                                dialogCreate.dismiss();
+
+                            }
+                        }
+                        else {
+                            Toast.makeText(MainActivity.this, "请输入正确的ssr链接", Toast.LENGTH_LONG).show();
+
+                        }
+                    }
+
+                });
+
                 new Handler().postDelayed(new Runnable() {
                     public void run() {
                         inputText.setFocusable(true);
