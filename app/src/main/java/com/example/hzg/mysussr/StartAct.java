@@ -31,7 +31,7 @@ public class StartAct extends AppCompatActivity {
      public static final  String sussrPath=Environment.getExternalStorageDirectory().getPath()+"/sussr";
      public static final  String sussrInstallPath=sussrPath+"/sussr.zip";
      public static final  String BusyboxInstallPath=sussrPath+"/busybox.apk";
-
+  private  Class  startTager=MainActivityUstTask.class ;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +72,7 @@ public class StartAct extends AppCompatActivity {
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                startActivity(new Intent(StartAct.this,MainActivity.class));
+                                startActivity(new Intent(StartAct.this,startTager));
                                 finish();
                             }
                         },1000);
@@ -96,7 +96,7 @@ public class StartAct extends AppCompatActivity {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    startActivity(new Intent(StartAct.this,MainActivity.class));
+                    startActivity(new Intent(StartAct.this,startTager));
                     finish();
                 }
             },1000);

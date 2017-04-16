@@ -11,7 +11,9 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +55,14 @@ public class Utils {
         }
         return  uidMessageList;
     }
+    public  static  void  closed(Closeable closeable)
+    {
+        try {
+            closeable.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
    public static class  AppUidMessage{
         String appName;
         Drawable appIcon;
@@ -76,4 +86,5 @@ public class Utils {
             return Uid;
         }
     }
+
 }

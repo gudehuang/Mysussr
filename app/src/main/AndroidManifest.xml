@@ -26,6 +26,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".MainActivity1"/>
+        <activity android:name=".MainActivityUstTask"/>
         <receiver android:name=".BootBroadcastReceiver"/>
        <provider
            android:authorities="com.example.hzg.mysussr.provider"

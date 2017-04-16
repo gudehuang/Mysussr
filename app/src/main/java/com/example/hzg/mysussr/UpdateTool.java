@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -38,11 +39,7 @@ public class UpdateTool {
         void onError();
     }
      static  String mUrl="http://123.207.107.156:80/mysussr/update.json";
-    static Activity mAct;
 
-    public static void setmAct(Activity mAct) {
-        UpdateTool.mAct = mAct;
-    }
 
     public static int getAppVersionCode(Context context) {
 
@@ -72,10 +69,27 @@ public class UpdateTool {
         }
         return versionname;
     }
-    public  static void checkUpdate (final CheckCallBack checkCallBack)
+
+    /**
+     * 使用AsyncTask 进行网络查询
+     * @param checkCallBack  客户端的检查回调
+     */
+    public  static  void checkUpdate(CheckCallBack checkCallBack)
+    {
+        UpdateTask task=new UpdateTask(mUrl,checkCallBack);
+        task.execute();
+    }
+
+    /***
+     * 使用线程进行网络查询，
+     * @deprecated     逻辑不清晰；持有Actvivity引用，容易造成内存泄露；使用checkUpdate(CheckCallBack checkCallBack)
+     * @param mact         使用Activity的runOnUiThread( )执行客户端的回调
+     * @param checkCallBack 客户端的检查回调
+     */
+    public  static void checkUpdate (final Activity mact,final CheckCallBack checkCallBack)
     {
 
-        get(mUrl, new HttpConnectCallback() {
+        get(mUrl,mact, new HttpConnectCallback() {
             @Override
             public void onSuccess(String result) {
                     Gson gson=new Gson();
@@ -100,7 +114,13 @@ public class UpdateTool {
 
     }
 
-    public static void get(final String urlpath, final HttpConnectCallback callback) {
+    /**使用线程进行网络查询，
+     *
+     * @param urlpath    访问网址
+     * @param mAct      回调在Ui线程执行
+     * @param callback 自己写的联网回调
+     */
+    public static void get(final String urlpath, final Activity mAct,final HttpConnectCallback callback) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -151,6 +171,12 @@ public class UpdateTool {
 
     }
 
+    /**
+     * 读取InputStreamd的内容
+     * @param is
+     * @return  字符串
+     * @throws IOException
+     */
     private static String getStringFormInputStream(InputStream is) throws IOException {
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
         byte[] bytes=new byte[1024];
@@ -159,41 +185,68 @@ public class UpdateTool {
         {
             baos.write(bytes,0,len);
         }
-        is.close();
         String result=baos.toString("GBK");
         baos.close();
         return  result;
     }
 
-//    private static void usexUtils(final CheckCallBack checkCallBack) {
-//        RequestParams params=new RequestParams("http://123.207.107.156:80/mysussr/update.json");
-//        // RequestParams params=new RequestParams("http://baidu.com");
-//        // params.addQueryStringParameter("wd", "xUtils");
-//        params.setCharset("GBK");
-//        x.http().get(params, new Callback.CommonCallback<String>() {
-//            @Override
-//            public void onSuccess(String result) {
-//                Gson gson=new Gson();
-//                UpdateAppInfo updateAppInfo=gson.fromJson(result,UpdateAppInfo.class);
-//                checkCallBack.onSuccess(updateAppInfo);
-//            }
-//
-//            @Override
-//            public void onError(Throwable ex, boolean isOnCallback) {
-//          checkCallBack.onError(ex);
-//            }
-//
-//            @Override
-//            public void onCancelled(CancelledException cex) {
-//
-//            }
-//
-//            @Override
-//            public void onFinished() {
-//
-//            }
-//        });
-//    }
+    /**
+     * 升级查询UpdateTask
+     */
+    static class  UpdateTask extends AsyncTask<Void,Void,String> {
+    private String urlpath;
+    private  CheckCallBack checkCallBack;
+    public UpdateTask(String urlpath,CheckCallBack checkCallBack) {
+        this.urlpath = urlpath;
+        this.checkCallBack=checkCallBack;
+    }
+
+    @Override
+    protected String doInBackground(Void... params) {
+        HttpURLConnection connection = null;
+        String result = null;
+        try {
+            URL url = new URL(urlpath);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setReadTimeout(5000);
+            connection.setConnectTimeout(10000);
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 200) {
+                InputStream is = connection.getInputStream();
+                result = getStringFormInputStream(is);
+                is.close();
+                connection.disconnect();
+                System.out.println(result);
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @Override
+    protected void onPostExecute(String s) {
+        super.onPostExecute(s);
+        if (s==null)
+        {
+        checkCallBack.onError();
+        }
+        else {
+            Gson gson=new Gson();
+            UpdateAppInfo updateAppInfo=null;
+            try {
+                updateAppInfo = gson.fromJson(s, UpdateAppInfo.class);
+                checkCallBack.onSuccess(updateAppInfo);
+            }catch (Exception e)
+            {
+                checkCallBack.onError();
+            }
+
+        }
+    }
+}
 
 
 

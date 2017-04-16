@@ -1,7 +1,9 @@
 package com.example.hzg.mysussr;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AlertDialog;
@@ -38,6 +40,9 @@ public class ShellTool {
         Process p=null;
         StringBuffer errMessage =new StringBuffer();
         StringBuffer  message = new StringBuffer();
+        OutputStream os=null;
+        InputStream is=null;
+        InputStream err=null;
         try {
             if (isroot)
                 p = Runtime.getRuntime().exec("su");
@@ -45,15 +50,17 @@ public class ShellTool {
                 p = Runtime.getRuntime().exec(cmd[0]);
             }
 
-            OutputStream os=p.getOutputStream();
-            InputStream is=p.getInputStream();
-            InputStream err=p.getErrorStream();
+           os=p.getOutputStream();
+           is=p.getInputStream();
+           err=p.getErrorStream();
             for (String line:cmd)
             {
                 Log.d("ShellTool#cmd",line);
                 os.write((line+"\n").getBytes());
             }
+            os.flush();
             os.close();
+            os=null;
             BufferedReader read=new BufferedReader(new InputStreamReader(is));
             String line=null;
             while((line=read.readLine())!=null)
@@ -61,6 +68,9 @@ public class ShellTool {
                 Log.d("ShellTool#outputText",line);
                 message.append(line+"\n");
             }
+            is.close();
+            is=null;
+            read.close();
             if (isgeterrmessage) {
                 BufferedReader read_err = new BufferedReader(new InputStreamReader(err));
                 while ((line = read_err.readLine()) != null) {
@@ -68,12 +78,20 @@ public class ShellTool {
                     errMessage.append(line + "\n");
                 }
                 err.close();
+                err=null;
+               read_err.close();
             }
-            is.close();
+
 
         } catch (IOException e) {
             e.printStackTrace();
             errMessage.append(e.getMessage());
+        }finally {
+            if (p!=null)
+            p.destroy();
+            if (os!=null)Utils.closed(os);
+            if (is!=null)Utils.closed(os);
+            if (err!=null)Utils.closed(os);
         }
         return new String[]{message.toString(),errMessage.toString()};
 
@@ -135,6 +153,15 @@ public class ShellTool {
         }
 
     }
+
+    /**
+     * 客户端执行shell命令使用方法
+     * @deprecated  逻辑不清晰，使用复杂
+     * @param cmd          待执行命令
+     * @param isroot       是否以root权限执行
+     * @param isgeterrmessage  是否获取错误信息
+     * @param handler        调用者的handler
+     */
     public static  void execShellWithHandler(final String[] cmd, final boolean isroot, final boolean isgeterrmessage, final Handler handler)
     {
         new Thread(new Runnable() {
@@ -148,5 +175,78 @@ public class ShellTool {
             }
         }).start();
 
+    }
+
+    /**
+     * 客户端执行shell命令使用方法
+     * @param context
+     * @param cmd
+     * @param isRoot
+     * @param isGetErrMessage
+     */
+    public  static void  execShellTask(Context context,String[] cmd,boolean isRoot,boolean isGetErrMessage)
+    {
+        ShellTask task=new ShellTask(context,cmd,isRoot,isGetErrMessage);
+        task.execute();
+
+    }
+
+    /**
+     * shell命令执行ShellTask
+     */
+    static class  ShellTask extends AsyncTask<Void,Void,String[]>
+    {
+        static AlertDialog.Builder builder;
+        static ProgressDialog dialog;
+        private  Context mContext;
+public static  void  relase()
+{
+   builder=null;
+    dialog=null;
+}
+        String[] mcmd;
+        boolean isroot,isgeteer;
+        private  String  logTag="ShellTask";
+        public ShellTask(Context context,String[] cmd,boolean isRoot,boolean isGetErrMessage) {
+            mContext=context;
+            mcmd=cmd;
+            isroot=isRoot;
+            isgeteer=isGetErrMessage;
+            Log.d(logTag,"create");
+        }
+
+        @Override
+        protected String[] doInBackground(Void... params) {
+            Log.d(logTag,"doInBackground");
+
+            String[] result=execShell(mcmd,isroot,isgeteer);
+            return result;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Log.d(logTag,"onPreExecute");
+            if (dialog==null)
+            dialog=ProgressDialog.show(mContext,"脚本执行","脚本执行中，请稍等........",true,false);
+            else dialog.show();
+        }
+
+
+
+        @Override
+        protected void onPostExecute(String[] strings) {
+            super.onPostExecute(strings);
+            Log.d(logTag,"onPostExecute");
+            dialog.dismiss();
+            if (builder==null)
+            builder=new AlertDialog.Builder(mContext);
+            builder.setTitle("执行结果");
+            builder.setMessage("输出信息：\n"+strings[0]+"\n"+"错误信息：\n"+strings[1]+"\n");
+            builder.setNegativeButton("确定",null);
+            builder.create().show();
+            mContext=null;
+
+        }
     }
 }

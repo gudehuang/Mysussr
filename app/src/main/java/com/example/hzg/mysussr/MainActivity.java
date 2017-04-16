@@ -51,6 +51,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * 旧版本，显示内容为RecycleView ，子项使用同一个布局
+ * 里面使用的方法是旧方法
+ */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     RecyclerView applistview;
     Button btnstart, btnstop, btncheck;
@@ -112,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         applistview.setAdapter(adapter);
         downloadBroadcastReceiver=new DownloadBroadcastReceiver();
         registerReceiver(downloadBroadcastReceiver,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        UpdateTool.setmAct(this);
+
     }
 
     private void initParams() {
@@ -214,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 else  FileTool.editTextFileWithStream(this,"/data/sussr/说明.txt");
                 break;
             case  R.id.menu_update:
-                 UpdateTool.checkUpdate(new UpdateTool.CheckCallBack() {
+                 UpdateTool.checkUpdate(this,new UpdateTool.CheckCallBack() {
                      @Override
                      public void onSuccess(final UpdateAppInfo updateAppInfo) {
                          AlertDialog.Builder updateBuilder = new AlertDialog.Builder(MainActivity.this);

@@ -139,6 +139,32 @@ public class ConfigTool {
                     "4G广告过滤","热点广告过滤","WIFI广告过滤","广告规则自动更新",
                     "开机自启脚本"
             };
+      private  String[] models=new String[]
+              {
+                      "常用配置","放行设置","过滤设置","其他设置"
+              };
+      private  int[] modleIndex=new int[]
+              {0,10,15,19
+              };
+       public  int[] getModelsize()
+       {
+           int[] modelsize=new int[models.length];
+           for (int i=0;i<modelsize.length;i++)
+           {
+               if (i==modelsize.length-1)
+                   modelsize[i]=header.length-modleIndex[i];
+              else modelsize[i]=modleIndex[i+1]-modleIndex[i];
+           }
+           return  modelsize;
+       }
+
+    public String[] getModels() {
+        return models;
+    }
+
+    public int[] getModleIndex() {
+        return modleIndex;
+    }
 
     public int[] getType() {
         return type;
@@ -260,5 +286,9 @@ public class ConfigTool {
 
        }
         return  item;
+    }
+    public  void release()
+    {
+        datalist=null;
     }
 }
