@@ -144,7 +144,7 @@ public class ConfigTool {
                       "常用配置","放行设置","过滤设置","其他设置"
               };
       private  int[] modleIndex=new int[]
-              {0,10,15,19
+              {0,11,15,19
               };
        public  int[] getModelsize()
        {
@@ -271,10 +271,8 @@ public class ConfigTool {
         String[] item=null;
        try {
            byte[] bytes = Base64.decode(string, Base64.DEFAULT);
-
            String decodeString = new String(bytes);
            String[] parms = decodeString.split("/")[0].split(":");
-
            System.out.println(decodeString);
            item=parms;
            for (String i:parms)

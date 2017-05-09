@@ -1,5 +1,6 @@
 package com.example.hzg.mysussr;
 
+import android.animation.ObjectAnimator;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -81,6 +82,10 @@ public class ShellTool {
                 err=null;
                read_err.close();
             }
+            else {
+                err.close();
+                err=null;
+            }
 
 
         } catch (IOException e) {
@@ -90,8 +95,8 @@ public class ShellTool {
             if (p!=null)
             p.destroy();
             if (os!=null)Utils.closed(os);
-            if (is!=null)Utils.closed(os);
-            if (err!=null)Utils.closed(os);
+            if (is!=null)Utils.closed(is);
+            if (err!=null)Utils.closed(err);
         }
         return new String[]{message.toString(),errMessage.toString()};
 
@@ -196,13 +201,13 @@ public class ShellTool {
      */
     static class  ShellTask extends AsyncTask<Void,Void,String[]>
     {
-        static AlertDialog.Builder builder;
-        static ProgressDialog dialog;
+       private AlertDialog.Builder builder;
+      private ProgressDialog dialog;
         private  Context mContext;
 public static  void  relase()
 {
-   builder=null;
-    dialog=null;
+
+
 }
         String[] mcmd;
         boolean isroot,isgeteer;
@@ -227,9 +232,8 @@ public static  void  relase()
         protected void onPreExecute() {
             super.onPreExecute();
             Log.d(logTag,"onPreExecute");
-            if (dialog==null)
-            dialog=ProgressDialog.show(mContext,"脚本执行","脚本执行中，请稍等........",true,false);
-            else dialog.show();
+            dialog=ProgressDialog.show(mContext,"脚本执行","脚本执行中，请稍等........",true,!isgeteer);
+
         }
 
 
@@ -239,11 +243,11 @@ public static  void  relase()
             super.onPostExecute(strings);
             Log.d(logTag,"onPostExecute");
             dialog.dismiss();
-            if (builder==null)
             builder=new AlertDialog.Builder(mContext);
             builder.setTitle("执行结果");
             builder.setMessage("输出信息：\n"+strings[0]+"\n"+"错误信息：\n"+strings[1]+"\n");
             builder.setNegativeButton("确定",null);
+
             builder.create().show();
             mContext=null;
 

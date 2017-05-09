@@ -210,6 +210,8 @@ public class MainActivity1 extends AppCompatActivity implements View.OnClickList
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu,menu);
+        menu.setGroupVisible(R.id.mene_showNever,false);
+        menu.setGroupVisible(R.id.menu_showAlways,true);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -319,7 +321,8 @@ public class MainActivity1 extends AppCompatActivity implements View.OnClickList
                         if (ssr.indexOf("ssr://")==0) {
                             String[] defaultSetting = mConfigTool.getConfigItemFromSSR(ssr);
                             if (defaultSetting == null) {
-                                Toast.makeText(MainActivity1.this, "导入失败,请输入正确的ssr链接", Toast.LENGTH_LONG).show();
+                                inputText.setError("导入失败,请输入正确的ssr链接");
+                               // Toast.makeText(MainActivity1.this, "导入失败,请输入正确的ssr链接", Toast.LENGTH_LONG).show();
                             } else {
                                 datalist.add(defaultSetting);
                                 position = datalist.size() - 1;
@@ -330,7 +333,8 @@ public class MainActivity1 extends AppCompatActivity implements View.OnClickList
                             }
                         }
                         else {
-                            Toast.makeText(MainActivity1.this, "请输入正确的ssr链接", Toast.LENGTH_LONG).show();
+                            inputText.setError("请输入正确的ssr链接");
+                           // Toast.makeText(MainActivity1.this, "请输入正确的ssr链接", Toast.LENGTH_LONG).show();
 
                         }
                     }
@@ -359,17 +363,13 @@ public class MainActivity1 extends AppCompatActivity implements View.OnClickList
         switch (v.getId())
         {
             case R.id.check_btn:
-
-                dialog=ProgressDialog.show(this,"脚本执行","脚本执行中，请稍等........",true,false);
-                ShellTool.execShellWithHandler(mConfigTool.getCheckShell(),true,false,handler);
+                  ShellTool.execShellTask(this,mConfigTool.getCheckShell(),true,true);
                 break;
             case  R.id.start_btn:
-                dialog=ProgressDialog.show(this,"脚本执行","脚本执行中，请稍等........",true,true);
-                ShellTool.execShellWithHandler(mConfigTool.getStartShell(position),true,false,handler);
+                ShellTool.execShellTask(this,mConfigTool.getStartShell(position),true,false);
                 break;
             case  R.id.stop_btn:
-                dialog=ProgressDialog.show(this,"脚本执行","脚本执行中，请稍等........",true,false);
-                ShellTool.execShellWithHandler(mConfigTool.getStopShell(),true,false,handler);
+                ShellTool.execShellTask(this,mConfigTool.getStopShell(),true,true);
                 break;
             case  R.id.checkip_btn:
                 final WebView webview=new WebView(this);

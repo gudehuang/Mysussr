@@ -32,6 +32,7 @@ public class StartAct extends AppCompatActivity {
      public static final  String sussrInstallPath=sussrPath+"/sussr.zip";
      public static final  String BusyboxInstallPath=sussrPath+"/busybox.apk";
   private  Class  startTager=MainActivityUstTask.class ;
+  //private  Class  startTager=MainActivity1.class ;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

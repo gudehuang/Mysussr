@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<group>
+    <item
+        app:showAsAction="never"
+        android:title="安装sussr"
+        android:icon="@drawable/installsussr"
+        android:id="@+id/menu_install_sussr"
+        />
+    <item
+        app:showAsAction="never"
+        android:icon="@drawable/remove"
+        android:title="卸载sussr"
+        android:id="@+id/menu_uninstall_sussr"
+        />
+    <item
+        app:showAsAction="never"
+         android:icon="@drawable/installbusybox"
+        android:title="安装busybox"
+        android:id="@+id/menu_install_busybox"
+        />
+    <item
+        app:showAsAction="never"
+        android:icon="@drawable/help"
+        android:title="查看说明"
+        android:id="@+id/menu_help"
+        />
+    <item
+        app:showAsAction="never"
+        android:icon="@drawable/uid"
+        android:title="查看UID"
+        android:id="@+id/menu_uid"
+        />
+    <item
+        app:showAsAction="never"
+        android:icon="@drawable/reset"
+        android:title="重置应用"
+        android:id="@+id/menu_reset"
+        />
+    <item
+        app:showAsAction="never"
+        android:icon="@drawable/update"
+        android:title="检测更新"
+        android:id="@+id/menu_update"
+        />
+</group>
+
+<group
+    android:visible="false">
+    <item
+        app:showAsAction="always"
+        android:title="选择配置"
+        android:id="@+id/menu_select_list"
+        />
+    <item
+        app:showAsAction="always"
+        android:title="编辑配置文件"
+        android:id="@+id/menu_edit_setting"
+        />
+</group>
+</menu>

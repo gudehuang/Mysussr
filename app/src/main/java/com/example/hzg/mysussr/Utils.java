@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
+import android.util.TypedValue;
 
 import java.io.Closeable;
 import java.io.File;
@@ -62,6 +63,16 @@ public class Utils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    public  static  float  dp2px(Context context,float value)
+    {
+        float result=TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,value,context.getResources().getDisplayMetrics());
+        return  result;
+    }
+    public  static int px2dp(Context context,float value)
+    {
+        float scale=context.getResources().getDisplayMetrics().density;
+        return (int) (value/scale+0.5f);
     }
    public static class  AppUidMessage{
         String appName;

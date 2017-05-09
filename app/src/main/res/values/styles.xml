@@ -7,5 +7,11 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
-
+<style name="menButton" >
+     <item name="android:layout_alignParentBottom">true</item>
+     <item name="android:layout_alignParentRight">true</item>
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_margin">64dp</item>
+</style>
 </resources>

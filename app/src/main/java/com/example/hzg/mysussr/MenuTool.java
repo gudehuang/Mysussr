@@ -41,7 +41,14 @@ public class MenuTool {
     }
 
     DownloadBroadcastReceiver downloadBroadcastReceiver;
-    public MenuTool(Context context,Handler handler, ProgressDialog dialog,ConfigTool configTool) {
+
+    public MenuTool(Context mContext, ConfigTool mConfigTool, DownloadBroadcastReceiver downloadBroadcastReceiver) {
+        this.mContext = mContext;
+        this.mConfigTool = mConfigTool;
+        this.downloadBroadcastReceiver = downloadBroadcastReceiver;
+    }
+
+    public MenuTool(Context context, Handler handler, ProgressDialog dialog, ConfigTool configTool) {
         mHandler=handler;
         mdialog= dialog;
         mContext=context;
@@ -49,21 +56,20 @@ public class MenuTool {
     }
 
     public void menuInstall() {
-        exec(mConfigTool.getInstallShell(), mHandler);
+        ShellTool.execShellTask(mContext,mConfigTool.getInstallShell(),true,true);
+
     }
 
     public void menuUninstall() {
-        exec(mConfigTool.getRemoveShell(), mHandler);
+        ShellTool.execShellTask(mContext,mConfigTool.getRemoveShell(),true,true);
+
     }
 
     public void menuInstallBusybox() {
         Utils.installApk(mContext, StartAct.BusyboxInstallPath,"com.example.hzg.mysussr.provider");
     }
 
-    public void exec(String[] removeShell, Handler mHandler) {
-        mdialog = ProgressDialog.show(mContext, "脚本执行", "脚本执行中，请稍等........", true, false);
-        ShellTool.execShellWithHandler(removeShell, true, true, mHandler);
-    }
+
 
     public void menuReset() {
         SharedPreferences.Editor editor=mContext.getSharedPreferences("sussr",MODE_PRIVATE).edit();
@@ -89,7 +95,7 @@ public class MenuTool {
     }
 
     public void menuUpdate() {
-        UpdateTool.checkUpdate((Activity) mContext,new UpdateTool.CheckCallBack() {
+        UpdateTool.checkUpdate(new UpdateTool.CheckCallBack() {
             @Override
             public void onSuccess(final UpdateAppInfo updateAppInfo) {
                 AlertDialog.Builder updateBuilder = new AlertDialog.Builder(mContext);
@@ -150,6 +156,67 @@ public class MenuTool {
 
 
         });
+//        UpdateTool.checkUpdate((Activity) mContext,new UpdateTool.CheckCallBack() {
+//            @Override
+//            public void onSuccess(final UpdateAppInfo updateAppInfo) {
+//                AlertDialog.Builder updateBuilder = new AlertDialog.Builder(mContext);
+//                updateBuilder.setTitle("当前版本"+UpdateTool.getAppVersionName(mContext.getApplicationContext()));
+//                if (updateAppInfo.data.apkVersionCode>UpdateTool.getAppVersionCode(mContext.getApplicationContext())) {
+//
+//                    updateBuilder.setMessage("有新版本可以更新!\n"+updateAppInfo.data.toString());
+//                    final String apkFileName=updateAppInfo.data.apkName+updateAppInfo.data.apkVersion+".apk";
+//                    updateBuilder.setPositiveButton("立即更新", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//                            //检查目录中有没有更新文件，有就直接安装，没有就使用DownloadManger下载
+//                            File apkFile=new File(mContext.getExternalFilesDir("apk")+"/"+apkFileName);
+//                            if (apkFile.exists())
+//                            {
+//                                Utils.installApk(mContext,apkFile.getPath(),"com.example.hzg.mysussr.provider");
+//                            }
+//                            else {
+//                                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(updateAppInfo.data.apkUrl));
+//                                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+//                                request.setTitle(updateAppInfo.data.apkName + updateAppInfo.data.apkVersion);
+//                                request.setDescription("MySussr更新中");
+//                                request.setMimeType("application/vnd.android.package-archive");
+//                                request.setDestinationInExternalFilesDir(mContext, "apk", apkFileName);
+//                                //DownloadManger 下载的文件重名不会覆写，只会在文件名后加一些标识符
+//                                // 如 update-1.apk ，-2
+//                                //需要清理重复的文件
+//                                File apkdir = mContext.getExternalFilesDir("apk");
+//                                if (apkdir.exists()) {
+//                                    File[] files = apkdir.listFiles();
+//                                    for (File file : files) {
+//                                        file.delete();
+//                                    }
+//                                }
+//                                DownloadManager downloadManager = (DownloadManager) mContext.getSystemService(DOWNLOAD_SERVICE);
+//                                long id = downloadManager.enqueue(request);
+//                                downloadBroadcastReceiver.setmDownloadId(id);
+//                            }
+//                        }
+//                    });
+//                    updateBuilder.setNeutralButton("暂不更新",null);
+//                }
+//                else
+//                {
+//                    updateBuilder.setMessage("当前版本已经是最新的了，无需更新");
+//
+//                }
+//
+//                updateBuilder.create().show();
+//            }
+//
+//            @Override
+//            public void onError() {
+//
+//                Toast.makeText(mContext,"访问失败",Toast.LENGTH_LONG).show();
+//
+//            }
+//
+//
+//        });
     }
 
     public void menuUid() {
