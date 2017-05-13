@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:padding="10dp"
+        android:id="@+id/app_selected"
+        android:scaleType="centerInside"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.5"
+        android:src="@drawable/uid_selected" />
+
+    <ImageView
+        android:scaleType="centerInside"
+        android:id="@+id/app_icon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@mipmap/ic_launcher_round" />
+
+    <TextView
+        android:id="@+id/app_name"
+        android:text="阴阳师"
+        android:gravity="center|left"
+        android:textSize="18dp"
+        android:layout_width="0dp"
+        android:layout_weight="1.5"
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/app_uid"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center|left"
+        android:text="10086"
+        android:textSize="18dp" />
+    <ImageView
+        android:id="@id/dlsv_drag"
+        android:padding="8dp"
+        android:layout_width="0dp"
+        android:layout_weight="0.5"
+        android:scaleType="centerInside"
+        android:src="@drawable/uid_selected_list_drag"
+        android:layout_height="match_parent" />
+</LinearLayout>

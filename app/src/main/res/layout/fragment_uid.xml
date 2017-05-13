@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<com.example.hzg.mysussr.view.TabLinearLayout
+    android:background="@color/tabLayout"
+    android:layout_alignParentTop="true"
+    android:id="@+id/fragment_uid_tablayout"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    app:tabCount="3"
+    app:tabTitleArrayRes="@array/tabTitles"></com.example.hzg.mysussr.view.TabLinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/fragment_uid_bottomlayout"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/fragment_uid_bottomlayout_selectall"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:drawableLeft="@drawable/uid_selected"
+            android:text="全选"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:layout_height="match_parent" />
+     <View
+         android:layout_width="0dp"
+         android:layout_height="1dp"
+         android:layout_weight="1.5"
+         />
+
+        <TextView
+            android:id="@+id/fragment_uid_bottomlayout_save"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableStart="@drawable/fragment_uid_save"
+            android:gravity="start|center"
+            android:layout_gravity="center"
+            android:text="保存"
+            android:textColor="@color/colorPrimary"
+            android:textSize="14dp" />
+    </LinearLayout>
+    <com.example.hzg.mysussr.view.MyViewPager
+        android:id="@+id/fragment_uid_viewpager"
+        android:layout_below="@+id/fragment_uid_tablayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/fragment_uid_bottomlayout"
+        ></com.example.hzg.mysussr.view.MyViewPager>
+</RelativeLayout>

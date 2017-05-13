@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="60dp">
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/activity_main_viewholder1_title"
+                android:text="配置名称" android:layout_gravity="center"
+                style="@style/configTitle"/>
+
+           <RadioGroup
+               android:id="@+id/activity_main_viewholder1_content"
+               android:orientation="horizontal"
+               android:layout_width="0dp"
+               android:layout_weight="1"
+               android:gravity="end"
+               android:layout_height="wrap_content">
+               <RadioButton
+                   android:id="@+id/activity_main_viewholder1_content_0"
+                   android:text="直连"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content" />
+               <RadioButton
+                   android:id="@+id/activity_main_viewholder1_content_1"
+                   android:text="UDP转发"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content" />
+               <RadioButton
+                   android:text="TCP转发"
+                   android:id="@+id/activity_main_viewholder1_content_2"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content" />
+           </RadioGroup>
+        </LinearLayout>
+
+        <View
+          style="@style/dimelinear"/>
+    </LinearLayout>

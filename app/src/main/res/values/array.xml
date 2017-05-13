@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="item1">
+    <string-array name="method">
         <item>table</item>
         <item>rc4</item>
         <item>rc4-md5</item>
@@ -16,7 +16,7 @@
         <item>chacha20</item>
         <item>chacha20-ietf</item>
     </string-array>
-    <string-array name="item2">
+    <string-array name="protocol">
         <item>origin</item>
         <item>verify_simple</item>
         <item>verify_sha1</item>
@@ -25,11 +25,97 @@
         <item>auth_sha1_v2</item>
         <item>auth_sha1_v4</item>
     </string-array>
-    <string-array name="item3">
+    <string-array name="obscure">
         <item>plain</item>
         <item>http_simple</item>
         <item>tls_simple</item>
         <item>random_head</item>
         <item>tls1.2_ticket_auth</item>
+    </string-array>
+    <string-array name="configTitle">
+        <item>配置名称</item>
+        <item>服务器</item>
+        <item>端口</item>
+        <item>密码</item>
+        <item>gost密码（udp转发为2时有效）</item>
+
+        <item>加密方法</item>
+        <item>协议</item>
+        <item>混淆方式</item>
+        <item>混淆参数</item>
+        <item>DNS地址</item>
+
+        <item>UDP转发模式</item>
+        <item>本机UDP放行</item>
+        <item>热点UDP放行</item>
+        <item>WIFI代理</item>
+        <item>破视频版权</item>
+
+        <item>4G广告过滤</item>
+        <item>热点广告过滤</item>
+        <item>WIFI广告过滤</item>
+        <item>广告规则自动更新</item>
+
+
+    </string-array>
+    <string-array name="tabTitles">
+        <item>TCP放行</item>
+        <item>UDP放行</item>
+        <item>UDP禁网</item>
+    </string-array>
+
+    <string-array name="configName">
+        <item>IP</item>
+        <item>PORT</item>
+        <item>PASSWORD</item>
+        <item>GOSTPWD</item>
+        <item>METHOD</item>
+
+        <item>PROTOCOL</item>
+        <item>OBFS</item>
+        <item>HOST</item>
+        <item>DNS</item>
+        <item>DLUDP</item>
+
+        <item>BJUDP</item>
+        <item>GXUDP</item>
+        <item>QJDL</item>
+        <item>PBQ</item>
+        <item>DATAADB</item>
+
+        <item>HOTADB</item>
+        <item>WIFIADB</item>
+        <item>AUTOUPDATE</item>
+        <item>TFX</item>
+        <item>UFX</item>
+
+        <item>UJW</item>
+    </string-array>
+
+    <!--配置默认值-->
+    <string-array name="configValues">
+
+        <item>default</item>
+        <item>""</item>
+        <item>80</item>
+        <item>""</item>
+        <item>suppig</item>
+
+        <item>chacha20</item>
+        <item>auth_sha1</item>
+        <item>http_simple</item>
+        <item>114.255.201.163</item>
+        <item>114..114.114.114</item>
+
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>0</item>
+        <item>0</item>
+
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
     </string-array>
 </resources>

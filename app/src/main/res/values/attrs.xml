@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="TabLinearLayout">
+        <attr name="tabCount" format="integer"></attr>
+        <attr name="tabTitleArrayRes" format="reference"></attr>
+    </declare-styleable>
+</resources>

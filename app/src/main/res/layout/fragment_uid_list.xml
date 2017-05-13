@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<android.support.v4.widget.SwipeRefreshLayout
+    android:id="@+id/fragment_uid_list_srfl"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.mobeta.android.dslv.DragSortListView
+        android:id="@+id/fragment_uid_list_dslv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:drag_handle_id="@id/dlsv_drag"
+        app:float_background_color="@color/transparent"
+        >
+
+    </com.mobeta.android.dslv.DragSortListView>
+</android.support.v4.widget.SwipeRefreshLayout>
+
+</LinearLayout>

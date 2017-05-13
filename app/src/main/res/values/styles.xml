@@ -14,4 +14,29 @@
     <item name="android:layout_height">wrap_content</item>
     <item name="android:layout_margin">64dp</item>
 </style>
+
+    <style name="configTitle">
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">start</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="configText">
+        <item name="android:layout_margin">2dp</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="dimelinear">
+        <item name="android:layout_margin">2dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/colorDimen</item>
+    </style>
 </resources>

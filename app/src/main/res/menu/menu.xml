@@ -30,13 +30,13 @@
     <item
         app:showAsAction="never"
         android:icon="@drawable/uid"
-        android:title="查看UID"
+        android:title="应用放行设置"
         android:id="@+id/menu_uid"
         />
     <item
         app:showAsAction="never"
         android:icon="@drawable/reset"
-        android:title="重置应用"
+        android:title="重置资源文件"
         android:id="@+id/menu_reset"
         />
     <item
@@ -45,6 +45,10 @@
         android:title="检测更新"
         android:id="@+id/menu_update"
         />
+    <item android:id="@+id/menu_boot"
+        android:title="开机自启"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/circle_1"/>
 </group>
 
 <group
